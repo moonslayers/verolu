@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horario - Prof. Verónica Luna</title>
+    
+    <!-- 1. Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- 2. Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 3. Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- 4. SheetJS (Excel) -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <!-- 5. pdfmake (PDF) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        morning: '#f0f9ff',
+                        afternoon: '#fffbeb',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @media print {
+            @page { size: landscape; margin: 1cm; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            html, body { background-color: white !important; color: black !important; }
+            .dark .bg-gray-900, .dark .bg-gray-800 { background-color: white !important; }
+            .dark .text-gray-100, .dark .text-gray-200, .dark .text-gray-300 { color: black !important; }
+            .print\:hidden { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100 min-h-screen font-sans transition-colors duration-300">
+
+<div id="app" class="max-w-6xl mx-auto p-4 md:p-6 print:p-0">
+    
+    <!-- Controles Superiores -->
+    <div class="print:hidden flex flex-col lg:flex-row gap-4 justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6 transition-colors">
+        
+        <!-- Título -->
+        <div class="flex flex-col w-full lg:w-auto text-center lg:text-left">
+            <h1 class="text-xl font-bold text-blue-600 dark:text-blue-400 flex items-center justify-center lg:justify-start gap-2">
+                <i class="bi bi-laptop"></i> Horario de Informática
+            </h1>
+            <span class="text-sm text-gray-500 dark:text-gray-400">Prof. Verónica Luna Hernández</span>
+        </div>
+        
+        <!-- Buscador -->
+        <div class="relative w-full lg:w-72">
+            <input 
+                type="text" 
+                v-model="searchQuery" 
+                placeholder="Buscar salón (ej: 2E)..."
+                class="w-full pl-10 pr-10 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm">
+            <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
+            <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-2.5 text-gray-400 hover:text-red-500">
+                <i class="bi bi-x-circle-fill"></i>
+            </button>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex gap-2 w-full lg:w-auto justify-center lg:justify-end">
+            <button @click="toggleDarkMode" class="px-3 py-2 bg-gray-50 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl border border-gray-200 dark:border-gray-600 transition-colors" title="Cambiar tema">
+                <i class="bi" :class="isDarkMode ? 'bi-sun-fill text-yellow-400' : 'bi-moon-fill text-gray-600'"></i>
+            </button>
+            
+            <button @click="generatePDF" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-sm transition-colors flex items-center gap-2 text-sm" title="Descargar PDF">
+                <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+            </button>
+
+            <button @click="exportToExcel" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-sm transition-colors flex items-center gap-2 text-sm" title="Descargar Excel">
+                <i class="bi bi-file-earmark-excel-fill"></i> Excel
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VISTA ESCRITORIO (Tabla Clásica)           -->
+    <!-- ========================================== -->
+    <div class="hidden md:block overflow-x-auto bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 print:shadow-none print:border-none transition-colors">
+        <table class="w-full text-sm text-center border-collapse">
+            <thead>
+                <tr class="bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200 border-b-2 border-gray-300 dark:border-gray-600">
+                    <th class="p-3 border border-gray-200 dark:border-gray-700 font-bold w-32">Hora</th>
+                    <th v-for="day in days" :key="'desk-'+day" class="p-3 border border-gray-200 dark:border-gray-700 font-bold">
+                        {{ day }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(period, index) in schedule" :key="'desk-row-'+index">
+                    <td class="p-3 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs"
+                        :class="{'border-t-4 border-t-blue-400 dark:border-t-blue-600': period.startShift}">
+                        <div class="font-bold text-gray-800 dark:text-gray-200">{{ period.period }}</div>
+                        <div class="text-gray-500 dark:text-gray-400">{{ period.time }}</div>
+                        <div v-if="period.shift" class="mt-1 text-[10px] uppercase font-bold tracking-wider"
+                             :class="period.shift === 'Mañana' ? 'text-blue-500' : 'text-amber-600 dark:text-amber-400'">
+                            {{ period.shift }}
+                        </div>
+                    </td>
+                    <td v-for="day in days" :key="'desk-cell-'+day" class="p-2 border border-gray-200 dark:border-gray-700 transition-all"
+                        :class="{'bg-morning dark:bg-slate-800/50': period.shift === 'Mañana', 'bg-afternoon dark:bg-gray-800/80': period.shift === 'Tarde'}">
+                        <span v-if="period.classes[day]" 
+                            class="inline-block w-full py-2 px-1 rounded-lg transition-all duration-200"
+                            :class="isMatch(period.classes[day]) ? 'bg-green-300 text-green-900 shadow-md transform scale-105 font-bold dark:bg-green-700 dark:text-green-100 ring-2 ring-green-500' : 'font-bold text-gray-700 dark:text-gray-200 bg-white/60 dark:bg-gray-700/60 shadow-sm'">
+                            {{ period.classes[day] }}
+                        </span>
+                        <span v-else class="text-gray-300 dark:text-gray-600">-</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VISTA MÓVIL (Tarjetas / Cards)             -->
+    <!-- ========================================== -->
+    <div class="md:hidden flex flex-col gap-4">
+        <div v-for="(period, index) in schedule" :key="'mob-card-'+index"
+             class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            
+            <!-- Encabezado de la Tarjeta (Hora y Turno) -->
+            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center"
+                 :class="period.shift === 'Mañana' ? 'bg-blue-50 dark:bg-slate-800' : 'bg-amber-50 dark:bg-gray-800'">
+                <div>
+                    <h3 class="font-bold text-gray-800 dark:text-gray-100">{{ period.period }}</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ period.time }}</p>
+                </div>
+                <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded"
+                      :class="period.shift === 'Mañana' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200'">
+                    {{ period.shift }}
+                </span>
+            </div>
+            
+            <!-- Cuerpo de la Tarjeta (Días y Salones) -->
+            <div class="p-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <div v-for="day in days" :key="'mob-day-'+day" class="flex justify-between items-center py-1 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+                    <span class="text-gray-500 dark:text-gray-400 text-xs">{{ day }}</span>
+                    
+                    <span v-if="period.classes[day]"
+                          class="font-bold px-2 py-0.5 rounded transition-all"
+                          :class="isMatch(period.classes[day]) ? 'bg-green-300 text-green-900 dark:bg-green-700 dark:text-green-100 ring-2 ring-green-500' : 'text-gray-800 dark:text-gray-200'">
+                        {{ period.classes[day] }}
+                    </span>
+                    <span v-else class="text-gray-300 dark:text-gray-600 font-medium">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="text-center text-xs text-gray-400 dark:text-gray-500 mt-6 print:text-black flex items-center justify-center gap-1">
+        <i class="bi bi-code-slash"></i> Horario generado para uso personal • Prof. Verónica Luna Hernández
+    </p>
+</div>
+
+<script>
+    const { createApp, ref } = Vue;
+
+    createApp({
+        setup() {
+            const searchQuery = ref('');
+            const isDarkMode = ref(false);
+            const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+
+            const schedule = ref([
+                { period: '4ta Hora', time: '9:15 - 10:00', shift: 'Mañana', startShift: false, classes: { Lunes: '', Martes: '', Miércoles: '', Jueves: '2F', Viernes: '' } },
+                { period: '5ta Hora', time: '10:30 - 11:10', shift: 'Mañana', startShift: false, classes: { Lunes: '2E', Martes: '2F', Miércoles: '2E', Jueves: '2E', Viernes: '2F' } },
+                { period: '1ra Hora', time: '1:00 - 1:45', shift: 'Tarde', startShift: true, classes: { Lunes: '2G', Martes: '', Miércoles: '', Jueves: '', Viernes: '' } },
+                { period: '2da Hora', time: '1:45 - 2:30', shift: 'Tarde', startShift: false, classes: { Lunes: '', Martes: '', Miércoles: '', Jueves: '', Viernes: '2C' } }, 
+                { period: '3ra Hora', time: '2:30 - 3:15', shift: 'Tarde', startShift: false, classes: { Lunes: '3A', Martes: '', Miércoles: '', Jueves: '3B', Viernes: '3G' } },
+                { period: '4ta Hora', time: '3:15 - 4:00', shift: 'Tarde', startShift: false, classes: { Lunes: '', Martes: '', Miércoles: '2G', Jueves: '2D', Viernes: '' } },
+                { period: '5ta Hora', time: '4:20 - 5:05', shift: 'Tarde', startShift: false, classes: { Lunes: '2D', Martes: '2D', Miércoles: '3A', Jueves: '3G', Viernes: '' } },
+                { period: '6ta Hora', time: '5:05 - 5:50', shift: 'Tarde', startShift: false, classes: { Lunes: '3G', Martes: '2C', Miércoles: '3G', Jueves: '2C', Viernes: '' } }, 
+                { period: '7ma Hora', time: '5:50 - 6:35', shift: 'Tarde', startShift: false, classes: { Lunes: '3B', Martes: '2G', Miércoles: '3B', Jueves: '', Viernes: '3A' } }
+            ]);
+
+            const isMatch = (value) => {
+                if (!searchQuery.value || !value) return false;
+                return value.toLowerCase().includes(searchQuery.value.toLowerCase());
+            };
+
+            const toggleDarkMode = () => {
+                isDarkMode.value = !isDarkMode.value;
+                document.documentElement.classList.toggle('dark');
+            };
+
+            const generatePDF = () => {
+                const docDefinition = {
+                    pageOrientation: 'landscape',
+                    pageMargins: [20, 20, 20, 20],
+                    content: [
+                        { text: 'Horario de Informática', style: 'header' },
+                        { text: 'Prof. Verónica Luna Hernández', style: 'subheader', margin: [0, 0, 0, 15] },
+                        {
+                            table: {
+                                headerRows: 1,
+                                widths: ['auto', '*', '*', '*', '*', '*'],
+                                body: [
+                                    [
+                                        { text: 'Hora / Turno', style: 'tableHeader' }, 
+                                        { text: 'Lunes', style: 'tableHeader' }, 
+                                        { text: 'Martes', style: 'tableHeader' }, 
+                                        { text: 'Miércoles', style: 'tableHeader' }, 
+                                        { text: 'Jueves', style: 'tableHeader' }, 
+                                        { text: 'Viernes', style: 'tableHeader' }
+                                    ]
+                                ]
+                            }
+                        }
+                    ],
+                    styles: {
+                        header: { fontSize: 18, bold: true, alignment: 'center' },
+                        subheader: { fontSize: 14, alignment: 'center', color: '#555555' },
+                        tableHeader: { bold: true, fontSize: 12, alignment: 'center', fillColor: '#eeeeee' },
+                    }
+                };
+
+                schedule.value.forEach(period => {
+                    const row = [
+                        { 
+                            stack: [
+                                { text: period.period, bold: true, fontSize: 11 },
+                                { text: period.time, fontSize: 9, color: '#666666' },
+                                { text: period.shift.toUpperCase(), fontSize: 8, color: period.shift === 'Mañana' ? '#2563eb' : '#d97706' }
+                            ],
+                            alignment: 'center',
+                            margin: [0, 5, 0, 5],
+                            fillColor: period.shift === 'Mañana' ? '#f0f9ff' : '#fffbeb'
+                        }
+                    ];
+                    
+                    days.forEach(day => {
+                        row.push({
+                            text: period.classes[day] || '-',
+                            alignment: 'center',
+                            margin: [0, 10, 0, 10],
+                            bold: !!period.classes[day],
+                            fontSize: 12,
+                            fillColor: period.shift === 'Mañana' ? '#f0f9ff' : '#fffbeb'
+                        });
+                    });
+                    
+                    docDefinition.content[2].table.body.push(row);
+                });
+
+                pdfMake.createPdf(docDefinition).download('Horario_Veronica_Luna_Hernandez.pdf');
+            };
+
+            const exportToExcel = () => {
+                const dataForExcel = schedule.value.map(period => {
+                    return {
+                        "Hora": `${period.period} (${period.time})`,
+                        "Turno": period.shift,
+                        "Lunes": period.classes.Lunes || '-',
+                        "Martes": period.classes.Martes || '-',
+                        "Miércoles": period.classes.Miércoles || '-',
+                        "Jueves": period.classes.Jueves || '-',
+                        "Viernes": period.classes.Viernes || '-'
+                    };
+                });
+
+                const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
+                worksheet['!cols'] = [{ wch: 25 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }];
+
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Horario");
+                XLSX.writeFile(workbook, "Horario_Veronica_Luna_Hernandez.xlsx");
+            };
+
+            return {
+                searchQuery,
+                isDarkMode,
+                days,
+                schedule,
+                isMatch,
+                toggleDarkMode,
+                generatePDF,
+                exportToExcel
+            };
+        }
+    }).mount('#app');
+</script>
+
+</body>
+</html>
