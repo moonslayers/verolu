@@ -11,8 +11,8 @@ Estado actual: estructura base y PWA listas; el port del prototipo (`prototype/`
 ## Stack y versiones
 
 - Angular 22 (standalone, signals, zoneless) — `@angular/core ^22.2.0`
-- Tailwind CSS v4 (CSS-first, sin `tailwind.config.js`; config en `src/styles.css` + `@tailwindcss/postcss`)
-- `@angular/pwa` / `@angular/service-worker` (producción)
+- Tailwind CSS v4 vía schematic oficial de Angular (CSS-first, sin `tailwind.config.js`; config en `src/styles.css` + `@tailwindcss/postcss`; `tailwindcss ^4.1.12` en `package.json`, resuelto 4.3.5 — verifica con `npm ls tailwindcss`)
+- PWA vía schematic `@angular/pwa` (generador dev-time, intencionalmente no es dependencia del proyecto) + paquete runtime `@angular/service-worker` (producción)
 - npm 10.9.9, Node 22
 - Vitest para tests unitarios (`ng test`)
 
