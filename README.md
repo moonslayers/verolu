@@ -45,6 +45,15 @@ Artefactos en `dist/verolu/browser/`.
 npm run build -- --base-href /verolu/
 ```
 
+## Lint y formato
+
+```bash
+npm run lint          # ESLint (Angular + TypeScript + template a11y), falla en warnings (--max-warnings=0)
+npm run format:check  # Prettier --check (respeta .prettierrc)
+```
+
+CI ejecuta `npm run lint` antes del build y bloquea el despliegue si falla (ver `.github/workflows/deploy.yml`).
+
 ## Tests
 
 ```bash

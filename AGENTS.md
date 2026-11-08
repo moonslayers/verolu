@@ -25,6 +25,10 @@ Estado actual: estructura base y PWA listas; el port del prototipo (`prototype/`
 - `.vscode/` — configuración del editor y MCP de VS Code.
 - `dist/verolu/browser/` — salida de build (generada).
 
+## Verificación obligatoria
+
+Después de CUALQUIER tarea de implementación el agente DEBE ejecutar y pasar, en este orden, `npm run lint`, `npm run build` y `npm test` (no interactivo). Una tarea NO se considera terminada si alguno falla. Nunca deshabilites reglas ni uses `eslint-disable` para forzar un pase; si una regla es genuinamente incorrecta para el proyecto, cámbiala en `eslint.config.js` con justificación en el commit/PR. CI también bloquea el despliegue si `npm run lint` falla (ver `.github/workflows/deploy.yml`).
+
 ## Convenciones
 
 - Sin NgModules; componentes standalone por defecto.
