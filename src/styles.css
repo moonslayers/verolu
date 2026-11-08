@@ -1,1 +1,39 @@
-/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-morning: #f0f9ff;
+  --color-morning-accent: #2563eb;
+  --color-afternoon: #fffbeb;
+  --color-afternoon-accent: #d97706;
+
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+}
+
+:root {
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --border: #e2e8f0;
+  --foreground: #0f172a;
+  --foreground-muted: #475569;
+}
+
+.dark {
+  --surface: #0f172a;
+  --surface-muted: #1e293b;
+  --border: #334155;
+  --foreground: #f1f5f9;
+  --foreground-muted: #94a3b8;
+}
+
+@layer base {
+  *:focus-visible {
+    outline: 2px solid var(--color-morning-accent);
+    outline-offset: 2px;
+  }
+}
