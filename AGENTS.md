@@ -61,6 +61,8 @@ Después de CUALQUIER tarea de implementación el agente DEBE ejecutar y pasar, 
 - Servir: `npm start` (equiv. `ng serve`, http://localhost:4200)
 - Build: `npm run build`
 - Build para Pages: `npm run build -- --base-href /verolu/`
+- Lint: `npm run lint` (falla también con warnings)
+- Formato: `npm run format:check`
 - Tests: `npm run test`
 
 ## AI tooling
@@ -68,9 +70,12 @@ Después de CUALQUIER tarea de implementación el agente DEBE ejecutar y pasar, 
 Skills disponibles en `.agents/skills/`:
 - `angular-developer`: generar código Angular, arquitectura, signals, forms, routing, testing, CLI.
 - `angular-new-app`: crear nuevas apps Angular con CLI.
+  Nota: su ejemplo `--ai-config=agents` no es aceptado por CLI 22.2.6; valores válidos son `vscode`, `claude`, `cursor`, `gemini`, `jetbrains`, `windsurf` o `none`.
 - `tailwind-4-docs`: Tailwind v4 (utilidades, variantes, config, migración). El snapshot de docs NO está incluido; requiere aceptar la licencia upstream ejecutando `python .agents/skills/tailwind-4-docs/scripts/sync_tailwind_docs.py --accept-docs-license`.
 
 MCP: servidor `angular-cli` configurado en `opencode.json` (`npx -y @angular/cli mcp`), con herramientas como `get_best_practices`, `search_documentation`, `run_target`, `devserver_*`. No hay MCP oficial de Tailwind.
+
+En `opencode.json` usa solo las formas vigentes del esquema: `skills` como arreglo de rutas y `mcp.servers.<name>`. No reintroduzcas `skills.paths` ni entradas planas `mcp.<name>`; están deprecadas. Valida con `opencode debug config` y `opencode mcp list` tras editar.
 
 ## Límites
 
