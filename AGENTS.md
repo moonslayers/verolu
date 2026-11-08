@@ -1,3 +1,83 @@
+# Verolu — Horario de la Prof. Verónica Luna Hernández
+
+Eres un experto en TypeScript, Angular y desarrollo de aplicaciones web escalables. Escribes código funcional, mantenible, performante y accesible siguiendo las mejores prácticas de Angular y TypeScript.
+
+## Proyecto
+
+Aplicación web de **horario semanal** de la Prof. Verónica Luna Hernández. Usuarios: la profesora y sus estudiantes, que consultan el horario desde el navegador o instalado como PWA en el teléfono.
+
+Estado actual: estructura base y PWA listas; el port del prototipo (`prototype/`) al código Angular está pendiente. La UI muestra "En construcción — port en progreso".
+
+## Stack y versiones
+
+- Angular 22 (standalone, signals, zoneless) — `@angular/core ^22.2.0`
+- Tailwind CSS v4 (CSS-first, sin `tailwind.config.js`; config en `src/styles.css` + `@tailwindcss/postcss`)
+- `@angular/pwa` / `@angular/service-worker` (producción)
+- npm 10.9.9, Node 22
+- Vitest para tests unitarios (`ng test`)
+
+## Estructura del repositorio
+
+- `src/app/` — componentes, configuración (`app.config.ts`), estilos.
+- `public/` y `public/icons/` — assets estáticos y iconos PWA.
+- `prototype/` — referencia HTML del prototipo (no modificar; se portará después).
+- `.agents/skills/` — skills de IA del proyecto (angular-developer, angular-new-app, tailwind-4-docs).
+- `.vscode/` — configuración del editor y MCP de VS Code.
+- `dist/verolu/browser/` — salida de build (generada).
+
+## Convenciones
+
+- Sin NgModules; componentes standalone por defecto.
+- No poner `standalone: true` explícito (es el default en Angular v20+).
+- No poner `changeDetection: ChangeDetectionStrategy.OnPush` explícito (es el default en Angular v22+).
+- Estado con signals; `input()`/`output()`/`model()` en lugar de decoradores; `computed()`/`linkedSignal()` para estado derivado.
+- Control de flujo nativo (`@if`, `@for`, `@switch`), no `*ngIf`/`*ngFor`/`*ngSwitch`.
+- Bindings `class`/`style` en lugar de `ngClass`/`ngStyle`.
+- No importar `CommonModule`; importar solo las directivas/pipes usadas.
+- Sin CDNs ni librerías de UI/iconos salvo aprobación.
+- Copy de UI en español; identificadores en inglés.
+- Accesibilidad: pasar AXE y WCAG AA (foco, contraste, ARIA).
+- Mobile-first.
+
+## Reglas de dominio
+
+- Los datos del horario viven como constantes tipadas por ahora (sin backend, sin `localStorage` todavía).
+- No inventar nuevas fuentes de datos ni persistencia.
+
+## PWA y GitHub Pages
+
+- La app se despliega bajo el subpath `/verolu/`.
+- `manifest.webmanifest`: `scope` y `start_url` son relativos a propósito (`./`).
+- El service worker debe seguir funcionando bajo el subpath.
+- El build de producción usa base href `/verolu/`.
+
+## Comandos
+
+- Instalar: `npm install`
+- Servir: `npm start` (equiv. `ng serve`, http://localhost:4200)
+- Build: `npm run build`
+- Build para Pages: `npm run build -- --base-href /verolu/`
+- Tests: `npm run test`
+
+## AI tooling
+
+Skills disponibles en `.agents/skills/`:
+- `angular-developer`: generar código Angular, arquitectura, signals, forms, routing, testing, CLI.
+- `angular-new-app`: crear nuevas apps Angular con CLI.
+- `tailwind-4-docs`: Tailwind v4 (utilidades, variantes, config, migración). El snapshot de docs NO está incluido; requiere aceptar la licencia upstream ejecutando `python .agents/skills/tailwind-4-docs/scripts/sync_tailwind_docs.py --accept-docs-license`.
+
+MCP: servidor `angular-cli` configurado en `opencode.json` (`npx -y @angular/cli mcp`), con herramientas como `get_best_practices`, `search_documentation`, `run_target`, `devserver_*`. No hay MCP oficial de Tailwind.
+
+## Límites
+
+- No cambiar configuración de deploy/PWA casualmente.
+- No commitear secretos.
+- No tocar `prototype/` salvo para portarlo después.
+
+---
+
+## Guía oficial de Angular (generada por Angular CLI)
+
 You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
 
 ## TypeScript Best Practices
