@@ -17,6 +17,7 @@ import {
   minutesToTimeString,
   timeStringToMinutes,
   getMinutesSinceMidnight,
+  minutesUntil,
 } from './schedule.utils';
 import type { Weekday } from './schedule.model';
 
@@ -41,6 +42,33 @@ describe('schedule.utils — conversiones', () => {
     expect(minutesToTimeString(555)).toBe('09:15');
     expect(minutesToTimeString(0)).toBe('00:00');
     expect(minutesToTimeString(timeStringToMinutes('18:35'))).toBe('18:35');
+  });
+
+  it('valida estrictamente HH:mm', () => {
+    for (const v of ['9:15', '25:00', '12:60', '', 'abc']) {
+      expect(() => timeStringToMinutes(v)).toThrow();
+    }
+    expect(timeStringToMinutes('00:00')).toBe(0);
+    expect(timeStringToMinutes('23:59')).toBe(23 * 60 + 59);
+  });
+
+  it('las 9 horas reales se convierten correctamente', () => {
+    expect(timeStringToMinutes('09:15')).toBe(555);
+    expect(timeStringToMinutes('10:30')).toBe(630);
+    expect(timeStringToMinutes('13:00')).toBe(780);
+    expect(timeStringToMinutes('13:45')).toBe(825);
+    expect(timeStringToMinutes('14:30')).toBe(870);
+    expect(timeStringToMinutes('15:15')).toBe(915);
+    expect(timeStringToMinutes('16:00')).toBe(960);
+    expect(timeStringToMinutes('16:20')).toBe(980);
+    expect(timeStringToMinutes('17:05')).toBe(1025);
+  });
+
+  it('minutesUntil no produce NaN con entradas inválidas', () => {
+    const d = new Date(2026, 10, 9, 10, 0);
+    expect(Number.isNaN(minutesUntil(d, NaN))).toBe(false);
+    expect(minutesUntil(d, NaN)).toBe(0);
+    expect(Number.isNaN(minutesUntil(new Date(NaN), 100))).toBe(false);
   });
 
   it('getMinutesSinceMidnight usa hora local', () => {

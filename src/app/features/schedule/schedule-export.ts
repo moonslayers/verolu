@@ -2,7 +2,13 @@ import type { Lesson, Period } from '../../core/schedule/schedule.model';
 import { PERIODS, LESSONS } from '../../core/schedule/schedule.data';
 import { formatDayLong, formatTimeRange } from '../../core/schedule/schedule.utils';
 
-export const WEEKDAY_LABELS: readonly string[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] as const;
+export const WEEKDAY_LABELS: readonly string[] = [
+  'Lunes',
+  'Martes',
+  'Miércoles',
+  'Jueves',
+  'Viernes',
+] as const;
 
 export interface ExcelRow {
   readonly hora: string;
@@ -14,7 +20,11 @@ export interface ExcelRow {
   readonly viernes: string;
 }
 
-function lessonFor(periodId: string, weekday: number, lessons: readonly Lesson[]): Lesson | undefined {
+function lessonFor(
+  periodId: string,
+  weekday: number,
+  lessons: readonly Lesson[],
+): Lesson | undefined {
   return lessons.find((l) => l.periodId === periodId && l.weekday === weekday);
 }
 
@@ -45,7 +55,7 @@ export function toExcelRows(
 export function buildExcelSheetData(
   periods: readonly Period[] = PERIODS,
   lessons: readonly Lesson[] = LESSONS,
-): unknown[][] {
+): (string | number | null)[][] {
   const header = ['Hora', 'Turno', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
   const rows = toExcelRows(periods, lessons).map((r) => [
     r.hora,
@@ -61,7 +71,15 @@ export function buildExcelSheetData(
 
 export function buildExcelColumnWidths(): { width: number }[] {
   // Hora wider, turno narrow, days medium
-  return [{ width: 26 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 }];
+  return [
+    { width: 26 },
+    { width: 12 },
+    { width: 12 },
+    { width: 12 },
+    { width: 12 },
+    { width: 12 },
+    { width: 12 },
+  ];
 }
 
 export function getExcelSheetName(): string {
@@ -89,7 +107,14 @@ export function buildPdfDefinition(
   const header = 'Horario de Informática';
   const subheader = 'Prof. Verónica Luna Hernández';
   const generatedLabel = `Generado el ${formatDayLong(generatedAt)} · ${generatedAt.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}`;
-  const tableHeader = ['Hora / Turno', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] as const;
+  const tableHeader = [
+    'Hora / Turno',
+    'Lunes',
+    'Martes',
+    'Miércoles',
+    'Jueves',
+    'Viernes',
+  ] as const;
 
   const rows: string[][] = periods.map((p) => {
     const hourCell = `${p.label}\n${formatTimeRange(p)}\n${p.shift === 'morning' ? 'MAÑANA' : 'TARDE'}`;
@@ -135,7 +160,11 @@ export function buildPdfDefinition(
         },
         layout: 'lightHorizontalLines',
       },
-      { text: `Generado el ${generatedAt.toLocaleString('es-MX')}`, style: 'footer', margin: [0, 12, 0, 0] },
+      {
+        text: `Generado el ${generatedAt.toLocaleString('es-MX')}`,
+        style: 'footer',
+        margin: [0, 12, 0, 0],
+      },
     ],
     styles: {
       header: { fontSize: 18, bold: true, alignment: 'center' },
@@ -149,5 +178,15 @@ export function buildPdfDefinition(
     defaultStyle: { font: 'Roboto' },
   };
 
-  return { pageOrientation: 'landscape', pageSize: 'A4', header, subheader, generatedAt: generatedLabel, tableHeader, rows, shiftByRow, docDefinition };
+  return {
+    pageOrientation: 'landscape',
+    pageSize: 'A4',
+    header,
+    subheader,
+    generatedAt: generatedLabel,
+    tableHeader,
+    rows,
+    shiftByRow,
+    docDefinition,
+  };
 }

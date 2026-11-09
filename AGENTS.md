@@ -28,6 +28,7 @@ Estado actual: estructura base y PWA listas; el port del prototipo (`prototype/`
 ## Verificación obligatoria
 
 Después de CUALQUIER tarea de implementación el agente DEBE ejecutar y pasar, en este orden, `npm run lint`, `npm run build` y `npm test` (no interactivo). Una tarea NO se considera terminada si alguno falla. Nunca deshabilites reglas ni uses `eslint-disable` para forzar un pase; si una regla es genuinamente incorrecta para el proyecto, cámbiala en `eslint.config.js` con justificación en el commit/PR. CI también bloquea el despliegue si `npm run lint` falla (ver `.github/workflows/deploy.yml`).
+- `src/test-setup.ts` registra `fake-indexeddb/auto` (vía `angular.json` → `test.setupFiles`). En tests con Dexie, parte de una DB limpia y cierra la conexión en `afterEach`; no uses esperas arbitrarias.
 
 ## Convenciones
 
@@ -42,6 +43,7 @@ Después de CUALQUIER tarea de implementación el agente DEBE ejecutar y pasar, 
 - Copy de UI en español; identificadores en inglés.
 - Accesibilidad: pasar AXE y WCAG AA (foco, contraste, ARIA).
 - Mobile-first.
+- Toda la UI sigue `DESIGN.md`. No hardcodees fondos claros (`bg-white`) ni texto blanco sobre `accent`: usa tokens (`surface-raised`, `text-surface`) para mantener AA en ambos temas.
 
 ## Reglas de dominio
 
@@ -54,6 +56,7 @@ Después de CUALQUIER tarea de implementación el agente DEBE ejecutar y pasar, 
 - `manifest.webmanifest`: `scope` y `start_url` son relativos a propósito (`./`).
 - El service worker debe seguir funcionando bajo el subpath.
 - El build de producción usa base href `/verolu/`.
+- Las URLs de assets en CSS deben ser relativas (`url('fonts/...')`), nunca absolutas (`url('/...')`), para funcionar bajo `/verolu/`. Verifica con `npm run build -- --base-href /verolu/` sirviendo el `dist` bajo el subpath.
 
 ## Comandos
 

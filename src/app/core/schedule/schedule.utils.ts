@@ -4,9 +4,15 @@ import type { CurrentLesson, DayStatus, Lesson, NextLesson, Period, Weekday } fr
 // ── Time conversion ─────────────────────────────────────────────────────────
 
 export function timeStringToMinutes(time: string): number {
+  if (typeof time !== 'string' || !/^\d{2}:\d{2}$/.test(time)) {
+    throw new Error(`Invalid time format (expected "HH:mm"): ${JSON.stringify(time)}`);
+  }
   const parts = time.split(':');
   const h = Number(parts[0]);
   const m = Number(parts[1]);
+  if (!Number.isInteger(h) || !Number.isInteger(m) || h < 0 || h > 23 || m < 0 || m > 59) {
+    throw new Error(`Invalid time value (expected 00-23:00-59): ${JSON.stringify(time)}`);
+  }
   return h * 60 + m;
 }
 
@@ -19,7 +25,13 @@ export function minutesToTimeString(minutes: number): string {
 // ── Date helpers (local wall time) ────────────────────────────────────────
 
 export function getMinutesSinceMidnight(date: Date): number {
-  return date.getHours() * 60 + date.getMinutes();
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return 0;
+  }
+  const h = date.getHours();
+  const m = date.getMinutes();
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return 0;
+  return h * 60 + m;
 }
 
 export function isWeekend(date: Date): boolean {
@@ -213,5 +225,8 @@ export function formatCountdown(totalMinutes: number): string {
 }
 
 export function minutesUntil(date: Date, targetMinutes: number): number {
+  if (!Number.isFinite(targetMinutes)) {
+    return 0;
+  }
   return targetMinutes - getMinutesSinceMidnight(date);
 }

@@ -70,7 +70,7 @@ Claro / Oscuro / Sistema. Persistencia en IndexedDB vía `Dexie` (`ThemeReposito
 
 ## Exportación e impresión
 
-Horario: **Imprimir** (`window.print()` + `@media print` A4 horizontal, `data-print="hide"`), **PDF** (`pdfmake` lazy) y **Excel** (`write-excel-file` lazy) con mapeo `buildPdfDefinition` / `buildExcelSheetData`. Botones deshabilitados durante la generación (`isExporting` + `aria-busy`, foco restaurado tras éxito/error).
+Horario: la impresión se realiza con Ctrl+P del navegador (`@media print` A4 horizontal, `data-print="hide"`); la toolbar ofrece **PDF** (`pdfmake` lazy) y **Excel** (`write-excel-file` lazy) con mapeo `buildPdfDefinition` / `buildExcelSheetData`. Botones deshabilitados durante la generación (`isExporting` + `aria-busy`, foco restaurado tras éxito/error).
 
 ## Iconos
 

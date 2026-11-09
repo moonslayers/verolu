@@ -7,7 +7,6 @@ export type IconName =
   | 'monitor'
   | 'search'
   | 'x'
-  | 'printer'
   | 'file-down'
   | 'file-spreadsheet'
   | 'settings'
@@ -22,7 +21,11 @@ export type IconSize = 16 | 20 | 24;
   imports: [LucideDynamicIcon],
   template: `
     @if (label(); as lbl) {
-      <span role="img" [attr.aria-label]="lbl" class="inline-flex items-center justify-center leading-none">
+      <span
+        role="img"
+        [attr.aria-label]="lbl"
+        class="inline-flex items-center justify-center leading-none"
+      >
         <svg
           [lucideIcon]="name()"
           [size]="size()"

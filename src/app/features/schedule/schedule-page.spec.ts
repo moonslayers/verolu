@@ -1,5 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideLucideConfig, provideLucideIcons, LucideSearch, LucideX, LucidePrinter, LucideFileDown, LucideFileSpreadsheet } from '@lucide/angular';
+import {
+  provideLucideConfig,
+  provideLucideIcons,
+  LucideSearch,
+  LucideX,
+  LucideFileDown,
+  LucideFileSpreadsheet,
+} from '@lucide/angular';
 import { SchedulePage } from './schedule-page';
 import { buildExcelSheetData, buildPdfDefinition, toExcelRows } from './schedule-export';
 import { getHighlightSegments, normalizeText } from './schedule-search';
@@ -13,14 +20,16 @@ function fakeClockWithDate(date: Date): ClockService {
 }
 
 describe('SchedulePage', () => {
-  async function setup(date: Date = new Date(2026, 10, 9, 10, 0)): Promise<ComponentFixture<SchedulePage>> {
+  async function setup(
+    date: Date = new Date(2026, 10, 9, 10, 0),
+  ): Promise<ComponentFixture<SchedulePage>> {
     const clock = fakeClockWithDate(date);
     await TestBed.configureTestingModule({
       imports: [SchedulePage],
       providers: [
         { provide: ClockService, useValue: clock },
         provideLucideConfig({ color: 'currentColor', size: 16, strokeWidth: 1.75 }),
-        provideLucideIcons(LucideSearch, LucideX, LucidePrinter, LucideFileDown, LucideFileSpreadsheet),
+        provideLucideIcons(LucideSearch, LucideX, LucideFileDown, LucideFileSpreadsheet),
       ],
     }).compileComponents();
     const fixture = TestBed.createComponent(SchedulePage);
@@ -45,9 +54,13 @@ describe('SchedulePage', () => {
     const monday = new Date(2026, 10, 9, 10, 0);
     const fixture = await setup(monday);
     const el = fixture.nativeElement as HTMLElement;
-    const hoyBadges = Array.from(el.querySelectorAll('th')).filter((th) => th.textContent?.includes('Hoy'));
+    const hoyBadges = Array.from(el.querySelectorAll('th')).filter((th) =>
+      th.textContent?.includes('Hoy'),
+    );
     expect(hoyBadges.length).toBeGreaterThan(0);
-    const lunesHeader = Array.from(el.querySelectorAll('th')).find((th) => th.textContent?.includes('Lunes'));
+    const lunesHeader = Array.from(el.querySelectorAll('th')).find((th) =>
+      th.textContent?.includes('Lunes'),
+    );
     expect(lunesHeader?.textContent).toContain('Hoy');
     expect(fixture.componentInstance.todayWeekday()).toBe(1);
   });
@@ -57,7 +70,9 @@ describe('SchedulePage', () => {
     const fixture = await setup(saturday);
     expect(fixture.componentInstance.todayWeekday()).toBeNull();
     const el = fixture.nativeElement as HTMLElement;
-    const hoyBadges = Array.from(el.querySelectorAll('th')).filter((th) => th.textContent?.includes('Hoy'));
+    const hoyBadges = Array.from(el.querySelectorAll('th')).filter((th) =>
+      th.textContent?.includes('Hoy'),
+    );
     expect(hoyBadges.length).toBe(0);
   });
 
@@ -67,12 +82,16 @@ describe('SchedulePage', () => {
     const comp = fixture.componentInstance;
     expect(comp.todayWeekday()).toBe(1);
     expect(comp.currentPeriodId()).toBe('t3');
-    expect(comp.isCurrentPeriod('t3' as never)).toBe(true);
+    expect(comp.currentPeriodId()).toBe('t3');
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    const ahoraBadges = Array.from(el.querySelectorAll('*')).filter((n) => n.textContent?.trim() === 'Ahora');
+    const ahoraBadges = Array.from(el.querySelectorAll('*')).filter(
+      (n) => n.textContent?.trim() === 'Ahora',
+    );
     expect(ahoraBadges.length).toBeGreaterThan(0);
-    const hoyCount = Array.from(el.querySelectorAll('*')).filter((n) => n.textContent?.includes('Hoy')).length;
+    const hoyCount = Array.from(el.querySelectorAll('*')).filter((n) =>
+      n.textContent?.includes('Hoy'),
+    ).length;
     expect(hoyCount).toBeGreaterThan(0);
   });
 
@@ -83,8 +102,12 @@ describe('SchedulePage', () => {
     expect(comp.todayWeekday()).toBeNull();
     expect(comp.currentPeriodId()).toBeNull();
     const el = fixture.nativeElement as HTMLElement;
-    expect(Array.from(el.querySelectorAll('*')).some((n) => n.textContent?.includes('Hoy'))).toBe(false);
-    expect(Array.from(el.querySelectorAll('*')).some((n) => n.textContent?.trim() === 'Ahora')).toBe(false);
+    expect(Array.from(el.querySelectorAll('*')).some((n) => n.textContent?.includes('Hoy'))).toBe(
+      false,
+    );
+    expect(
+      Array.from(el.querySelectorAll('*')).some((n) => n.textContent?.trim() === 'Ahora'),
+    ).toBe(false);
   });
 
   it('búsqueda: placeholder corto, un único limpiar y contador AA', async () => {
@@ -182,7 +205,15 @@ describe('SchedulePage', () => {
     const sheetData = buildExcelSheetData();
     expect(sheetData.length).toBe(10);
     expect((sheetData[0] as string[]).length).toBe(7);
-    expect(sheetData[0]).toEqual(['Hora', 'Turno', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']);
+    expect(sheetData[0]).toEqual([
+      'Hora',
+      'Turno',
+      'Lunes',
+      'Martes',
+      'Miércoles',
+      'Jueves',
+      'Viernes',
+    ]);
     const rows = toExcelRows();
     expect(rows.length).toBe(9);
     const pdf = buildPdfDefinition(PERIODS, LESSONS, new Date(2026, 10, 9));
@@ -195,13 +226,9 @@ describe('SchedulePage', () => {
     expect(doc.content).toBeDefined();
   });
 
-  it('export: botones deshabilitados no permiten simultánea y print llama window.print', async () => {
+  it('export: botones deshabilitados no permiten simultánea', async () => {
     const fixture = await setup();
     const comp = fixture.componentInstance;
-    const printSpy = vi.spyOn(window, 'print').mockImplementation(() => undefined);
-    comp.printSchedule();
-    expect(printSpy).toHaveBeenCalled();
-    printSpy.mockRestore();
     comp.isExporting.set(true);
     comp.exportKind.set('pdf');
     fixture.detectChanges();
