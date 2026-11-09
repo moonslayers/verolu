@@ -24,6 +24,7 @@ import {
   provideLucideIcons,
 } from '@lucide/angular';
 import { ThemeService } from './core/theme/theme.service';
+import { UpdateService } from './core/pwa/update.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -50,6 +51,10 @@ export const appConfig: ApplicationConfig = {
         setTimeout(resolve, 400);
       });
       return Promise.race([init, timeout]).catch(() => undefined);
+    }),
+    provideAppInitializer(() => {
+      const update = inject(UpdateService);
+      void update.init();
     }),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),

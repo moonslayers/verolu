@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-hidden="true">
-  <rect width="512" height="512" fill="#FAF7F0"/>
-  <rect x="112" y="130" width="48" height="252" rx="12" fill="#1C1917"/>
-  <rect x="184" y="142" width="180" height="56" rx="12" fill="#1C1917"/>
-  <rect x="184" y="222" width="216" height="56" rx="12" fill="#C2410C"/>
-  <rect x="184" y="302" width="192" height="56" rx="12" fill="#1C1917"/>
+  <rect x="0" y="0" width="512" height="512" fill="#1C1917"/>
+  <circle cx="256" cy="256" r="212" fill="#FAF7F0"/>
+  <rect x="141" y="130" width="40" height="252" rx="10" fill="#1C1917"/>
+  <rect x="201" y="148" width="150" height="56" rx="10" fill="#1C1917"/>
+  <rect x="201" y="228" width="170" height="56" rx="10" fill="#C2410C"/>
+  <rect x="201" y="308" width="160" height="56" rx="10" fill="#1C1917"/>
 </svg>

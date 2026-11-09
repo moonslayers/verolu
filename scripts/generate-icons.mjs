@@ -14,12 +14,24 @@ const faviconSvgPath = resolve(iconsDir, 'brand-icon-favicon.svg');
 const faviconIcoPath = resolve(root, 'public/favicon.ico');
 
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+const INK = '#1C1917';
 
-async function renderSvgToPng(svgPath, size, destPath, background = '#FAF7F0') {
+async function renderAppIcon(svgPath, size, destPath) {
+  const svgBuffer = await readFile(svgPath);
+  await sharp(svgBuffer, { density: 512 })
+    .resize(size, size, { fit: 'contain', background: INK })
+    .flatten({ background: INK })
+    .ensureAlpha()
+    .png({ compressionLevel: 9, adaptiveFiltering: false })
+    .toFile(destPath);
+}
+
+async function renderSvgToPng(svgPath, size, destPath, background) {
   const svgBuffer = await readFile(svgPath);
   await sharp(svgBuffer, { density: 512 })
     .resize(size, size, { fit: 'contain', background })
     .flatten({ background })
+    .ensureAlpha()
     .png({ compressionLevel: 9, adaptiveFiltering: false })
     .toFile(destPath);
 }
@@ -29,16 +41,16 @@ async function main() {
 
   for (const size of sizes) {
     const dest = resolve(iconsDir, `icon-${size}x${size}.png`);
-    await renderSvgToPng(appIconPath, size, dest, '#FAF7F0');
+    await renderAppIcon(appIconPath, size, dest);
     console.log(`generated ${dest}`);
   }
 
   const maskableDest = resolve(iconsDir, 'icon-512x512-maskable.png');
-  await renderSvgToPng(maskablePath, 512, maskableDest, '#FAF7F0');
+  await renderAppIcon(maskablePath, 512, maskableDest);
   console.log(`generated ${maskableDest}`);
 
   const appleDest = resolve(iconsDir, 'apple-touch-icon.png');
-  await renderSvgToPng(appIconPath, 180, appleDest, '#FAF7F0');
+  await renderAppIcon(appIconPath, 180, appleDest);
   console.log(`generated ${appleDest}`);
 
   const fav16 = resolve(iconsDir, 'favicon-16.png');

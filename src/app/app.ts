@@ -4,9 +4,10 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter } from 'rxjs';
 import { BrandMark } from './shared/brand-mark/brand-mark';
 import { Icon } from './shared/icon/icon';
+import { ToastOutlet } from './shared/toast/toast-outlet';
 
 @Component({
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, BrandMark, Icon],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, BrandMark, Icon, ToastOutlet],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',

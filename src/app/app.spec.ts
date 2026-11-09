@@ -77,6 +77,7 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('Verónica Luna');
     expect(compiled.querySelector('a[href="#contenido"]')?.textContent).toContain('Saltar al contenido');
+    expect(compiled.querySelector('app-toast-outlet')).not.toBeNull();
   });
 
   it('should render header nav with 2 plates and gear Ajustes, bottom nav with exactly 2 links and aria-current', async () => {
