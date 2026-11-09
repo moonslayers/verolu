@@ -121,4 +121,54 @@ describe('ToastOutlet', () => {
     expect(alert.getAttribute('aria-live')).toBe('assertive');
     expect(alert.getAttribute('aria-atomic')).toBe('false');
   });
+
+  it('acción que lanza: el toast se elimina y el error se propaga', () => {
+    const cb = vi.fn(() => {
+      throw new Error('boom');
+    });
+    service.show({
+      message: 'm',
+      action: { label: 'Deshacer', callback: cb },
+      durationMs: 0,
+    });
+    fixture.detectChanges();
+    const toast = service.toasts()[0];
+    expect(() => fixture.componentInstance.onAction(toast)).toThrow('boom');
+    fixture.detectChanges();
+    expect(cb).toHaveBeenCalled();
+    expect(service.toasts().length).toBe(0);
+  });
+
+  it('coexistencia: toast polite (actualización) y assertive (irrecuperable) visibles en sus regiones', () => {
+    service.show({
+      message: 'Hay una nueva versión disponible.',
+      politeness: 'polite',
+      durationMs: 0,
+    });
+    service.show({
+      message: 'La app se quedó desactualizada. Recarga para continuar.',
+      politeness: 'assertive',
+      variant: 'danger',
+      durationMs: 0,
+    });
+    fixture.detectChanges();
+    const status = fixture.nativeElement.querySelector('[role="status"]') as HTMLElement;
+    const alert = fixture.nativeElement.querySelector('[role="alert"]') as HTMLElement;
+    expect(status.querySelectorAll('article').length).toBe(1);
+    expect(alert.querySelectorAll('article').length).toBe(1);
+    expect(status.textContent).toContain('Hay una nueva versión disponible.');
+    expect(alert.textContent).toContain('La app se quedó desactualizada. Recarga para continuar.');
+    expect(status.textContent).not.toContain('La app se quedó desactualizada');
+    expect(alert.textContent).not.toContain('Hay una nueva versión');
+  });
+
+  it('dos toasts persistentes simultáneos: ambos visibles y el foco no se mueve al aparecer el segundo', () => {
+    const before = document.activeElement;
+    service.show({ message: 'primero', durationMs: 0 });
+    fixture.detectChanges();
+    service.show({ message: 'segundo', durationMs: 0 });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('article').length).toBe(2);
+    expect(document.activeElement).toBe(before);
+  });
 });

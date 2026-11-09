@@ -7,6 +7,7 @@ import { WINDOW, type PwaWindow } from './pwa-window';
 
 const CHECK_INTERVAL_MS = 60 * 60 * 1000;
 const THROTTLE_MS = 60 * 1000;
+const STABILITY_FALLBACK_MS = 30 * 1000;
 
 @Service()
 export class UpdateService {
@@ -21,10 +22,17 @@ export class UpdateService {
   private lastCheckAt = 0;
   private readonly seenVersionHashes = new Set<string>();
   private unrecoverableShown = false;
+  private reloadFailureToastShown = false;
   private periodicTimer: ReturnType<typeof setInterval> | null = null;
+  private stabilityTimeout: ReturnType<typeof setTimeout> | null = null;
 
   private visibilityHandler: ((event: unknown) => void) | null = null;
   private pageshowHandler: ((event: unknown) => void) | null = null;
+  private onlineHandler: ((event: unknown) => void) | null = null;
+
+  private versionSub: { unsubscribe: () => void } | null = null;
+  private unrecoverableSub: { unsubscribe: () => void } | null = null;
+  private stableSub: { unsubscribe: () => void } | null = null;
 
   constructor() {
     this.destroyRef.onDestroy(() => this.cleanup());
@@ -37,7 +45,7 @@ export class UpdateService {
     const sw = this.swUpdate;
     if (!sw || !sw.isEnabled) return;
 
-    const versionSub = sw.versionUpdates.subscribe((event) => {
+    this.versionSub = sw.versionUpdates.subscribe((event) => {
       if (event.type === 'VERSION_READY') {
         const hash = event.latestVersion.hash;
         if (this.seenVersionHashes.has(hash)) return;
@@ -55,7 +63,7 @@ export class UpdateService {
       }
     });
 
-    const unrecoverableSub = sw.unrecoverable.subscribe(() => {
+    this.unrecoverableSub = sw.unrecoverable.subscribe(() => {
       if (this.unrecoverableShown) return;
       this.unrecoverableShown = true;
       this.toast.show({
@@ -83,30 +91,45 @@ export class UpdateService {
     }
 
     if (win && typeof win.addEventListener === 'function') {
-      const handler = () => {
+      const pageshow = () => {
         void this.checkForUpdate();
       };
-      this.pageshowHandler = handler;
-      win.addEventListener('pageshow', handler);
+      this.pageshowHandler = pageshow;
+      win.addEventListener('pageshow', pageshow);
+
+      const online = () => {
+        void this.checkForUpdate();
+      };
+      this.onlineHandler = online;
+      win.addEventListener('online', online);
     }
 
-    let stableSub: { unsubscribe: () => void } | null = null;
     if (this.appRef) {
-      stableSub = this.appRef.isStable
+      this.stableSub = this.appRef.isStable
         .pipe(
           filter((value: boolean) => value === true),
           take(1),
         )
         .subscribe(() => {
+          if (this.stabilityTimeout !== null) {
+            const win2 = this.resolveWindow();
+            const clearTimeoutFn =
+              win2?.clearTimeout ?? (typeof clearTimeout === 'function' ? clearTimeout : undefined);
+            if (clearTimeoutFn) clearTimeoutFn(this.stabilityTimeout);
+            this.stabilityTimeout = null;
+          }
           this.startPeriodic();
         });
-    }
 
-    this.destroyRef.onDestroy(() => {
-      versionSub.unsubscribe();
-      unrecoverableSub.unsubscribe();
-      stableSub?.unsubscribe();
-    });
+      const setTimeoutFn =
+        win?.setTimeout ?? (typeof setTimeout === 'function' ? setTimeout : undefined);
+      if (setTimeoutFn) {
+        this.stabilityTimeout = setTimeoutFn(() => {
+          this.stabilityTimeout = null;
+          this.startPeriodic();
+        }, STABILITY_FALLBACK_MS) as ReturnType<typeof setTimeout>;
+      }
+    }
   }
 
   async checkForUpdate(): Promise<void> {
@@ -115,29 +138,24 @@ export class UpdateService {
 
     const now = Date.now();
     if (now - this.lastCheckAt < THROTTLE_MS) return;
-    this.lastCheckAt = now;
 
     try {
       await sw.checkForUpdate();
+      this.lastCheckAt = Date.now();
     } catch {
-      // offline or failure: ignore
+      // offline or failure: do not consume throttle window
     }
   }
 
   private startPeriodic(): void {
+    if (this.periodicTimer !== null) return;
     const win = this.resolveWindow();
     const setIntervalFn =
       win?.setInterval ?? (typeof setInterval === 'function' ? setInterval : undefined);
-    const clearIntervalFn =
-      win?.clearInterval ?? (typeof clearInterval === 'function' ? clearInterval : undefined);
     if (!setIntervalFn) return;
-    if (this.periodicTimer !== null) return;
     this.periodicTimer = setIntervalFn(() => {
       void this.checkForUpdate();
     }, CHECK_INTERVAL_MS) as ReturnType<typeof setInterval>;
-    if (clearIntervalFn) {
-      // store clearer via closure? store id only; cleanup uses global clearInterval
-    }
   }
 
   private async activateAndReload(): Promise<void> {
@@ -154,9 +172,28 @@ export class UpdateService {
 
   private reload(): void {
     const win = this.resolveWindow();
-    if (win && typeof win.location?.reload === 'function') {
-      win.location.reload();
+    const reloadFn = win?.location?.reload;
+    if (typeof reloadFn !== 'function') {
+      this.showReloadFailureToast();
+      return;
     }
+    try {
+      reloadFn.call(win?.location);
+    } catch {
+      this.showReloadFailureToast();
+    }
+  }
+
+  private showReloadFailureToast(): void {
+    if (this.reloadFailureToastShown) return;
+    this.reloadFailureToastShown = true;
+    this.toast.show({
+      message: 'No se pudo recargar. Cierra y reabre la app.',
+      dismissible: false,
+      politeness: 'assertive',
+      durationMs: 0,
+      variant: 'danger',
+    });
   }
 
   private resolveDocument(): Document | null {
@@ -180,8 +217,12 @@ export class UpdateService {
     if (win && this.pageshowHandler && typeof win.removeEventListener === 'function') {
       win.removeEventListener('pageshow', this.pageshowHandler);
     }
+    if (win && this.onlineHandler && typeof win.removeEventListener === 'function') {
+      win.removeEventListener('online', this.onlineHandler);
+    }
     this.visibilityHandler = null;
     this.pageshowHandler = null;
+    this.onlineHandler = null;
 
     if (this.periodicTimer !== null) {
       const clearIntervalFn =
@@ -189,10 +230,23 @@ export class UpdateService {
       if (clearIntervalFn) clearIntervalFn(this.periodicTimer);
       this.periodicTimer = null;
     }
+
+    if (this.stabilityTimeout !== null) {
+      const clearTimeoutFn =
+        win?.clearTimeout ?? (typeof clearTimeout === 'function' ? clearTimeout : undefined);
+      if (clearTimeoutFn) clearTimeoutFn(this.stabilityTimeout);
+      this.stabilityTimeout = null;
+    }
+
+    this.versionSub?.unsubscribe();
+    this.unrecoverableSub?.unsubscribe();
+    this.stableSub?.unsubscribe();
+    this.versionSub = null;
+    this.unrecoverableSub = null;
+    this.stableSub = null;
+
+    this.initialized = false;
   }
 }
 
-export { UpdateService as PwaUpdateService };
-export { UpdateService as SwUpdateService };
-export { UpdateService as AppUpdateService };
 export default UpdateService;

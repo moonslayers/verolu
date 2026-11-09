@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { effect } from '@angular/core';
 import { ToastService } from './toast.service';
 import type { ShowToastOptions } from './toast.model';
 
@@ -63,7 +64,7 @@ describe('ToastService', () => {
     expect(service.toasts().length).toBe(0);
   });
 
-  it('límite de 3 descarta transitorio más antiguo', () => {
+  it('límite de 3 descarta transitorio más antiguo (protege persistentes)', () => {
     service.show({ message: 't1', durationMs: 5000 });
     service.show({ message: 't2', durationMs: 5000 });
     service.show({ message: 'p', durationMs: 0 });
@@ -75,7 +76,7 @@ describe('ToastService', () => {
     expect(messages).toContain('t4');
   });
 
-  it('si todos persistentes no descarta ninguno', () => {
+  it('protege persistentes y permite exceder el límite si todos son persistentes', () => {
     service.show({ message: 'p1', durationMs: 0 });
     service.show({ message: 'p2', durationMs: 0 });
     service.show({ message: 'p3', durationMs: 0 });
@@ -109,5 +110,56 @@ describe('ToastService', () => {
     expect(t.politeness).toBe('polite');
     expect(t.durationMs).toBe(5000);
     expect(t.variant).toBe('neutral');
+  });
+
+  it('evicción de transitorio cancela su timer (clearTimeout)', () => {
+    vi.useFakeTimers();
+    const clearSpy = vi.spyOn(globalThis, 'clearTimeout');
+    service.show({ message: 't1', durationMs: 1000 });
+    service.show({ message: 't2', durationMs: 1000 });
+    service.show({ message: 'p', durationMs: 0 });
+    const callsBefore = clearSpy.mock.calls.length;
+    service.show({ message: 't4', durationMs: 1000 });
+    expect(service.toasts().map((t) => t.message)).not.toContain('t1');
+    expect(clearSpy.mock.calls.length).toBeGreaterThan(callsBefore);
+    clearSpy.mockRestore();
+  });
+
+  it('IDs únicos y monotónicos tras dismiss y clear', () => {
+    const id1 = service.show({ message: 'a' });
+    const id2 = service.show({ message: 'b' });
+    service.dismiss(id1);
+    const id3 = service.show({ message: 'c' });
+    expect(id3).toBeGreaterThan(id2);
+    service.clear();
+    const id4 = service.show({ message: 'd' });
+    expect(id4).toBeGreaterThan(id3);
+    expect(new Set([id1, id2, id3, id4]).size).toBe(4);
+  });
+
+  it('dismiss(id inexistente) no rompe ni emite', () => {
+    service.show({ message: 'a' });
+    const before = service.toasts();
+    expect(() => service.dismiss(9999)).not.toThrow();
+    expect(service.toasts()).toBe(before);
+    expect(service.toasts().length).toBe(1);
+  });
+
+  it('show emite una sola vez incluso con evicción', () => {
+    service.show({ message: 't1', durationMs: 5000 });
+    service.show({ message: 't2', durationMs: 5000 });
+    service.show({ message: 'p', durationMs: 0 });
+    let count = 0;
+    TestBed.runInInjectionContext(() => {
+      effect(() => {
+        service.toasts();
+        count++;
+      });
+    });
+    TestBed.flushEffects();
+    const before = count;
+    service.show({ message: 't4', durationMs: 5000 });
+    TestBed.flushEffects();
+    expect(count - before).toBe(1);
   });
 });

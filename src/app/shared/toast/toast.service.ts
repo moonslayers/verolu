@@ -1,11 +1,5 @@
 import { DestroyRef, Service, inject, signal } from '@angular/core';
-import type {
-  ShowToastOptions,
-  Toast,
-  ToastAction,
-  ToastPoliteness,
-  ToastVariant,
-} from './toast.model';
+import type { ShowToastOptions, Toast } from './toast.model';
 
 @Service()
 export class ToastService {
@@ -34,16 +28,17 @@ export class ToastService {
     };
 
     const current = this._toasts();
+    let next = current;
     if (current.length >= 3) {
       const discardIndex = current.findIndex((t) => t.durationMs !== 0);
       if (discardIndex !== -1) {
         const toDiscard = current[discardIndex];
         this.cancelTimer(toDiscard.id);
-        this._toasts.set(current.filter((t) => t.id !== toDiscard.id));
+        next = current.filter((t) => t.id !== toDiscard.id);
       }
     }
 
-    this._toasts.update((list) => [...list, toast]);
+    this._toasts.set([...next, toast]);
 
     if (toast.durationMs !== 0) {
       const timer = setTimeout(() => {
@@ -57,7 +52,11 @@ export class ToastService {
 
   dismiss(id: number): void {
     this.cancelTimer(id);
-    this._toasts.update((list) => list.filter((t) => t.id !== id));
+    const current = this._toasts();
+    if (!current.some((t) => t.id === id)) {
+      return;
+    }
+    this._toasts.set(current.filter((t) => t.id !== id));
   }
 
   clear(): void {
@@ -76,5 +75,3 @@ export class ToastService {
     }
   }
 }
-
-export type { ToastAction, ToastPoliteness, ToastVariant };

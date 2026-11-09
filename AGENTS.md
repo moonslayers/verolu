@@ -28,6 +28,7 @@ Estado actual: estructura base y PWA listas; el port del prototipo (`prototype/`
 ## Verificación obligatoria
 
 Después de CUALQUIER tarea de implementación el agente DEBE ejecutar y pasar, en este orden, `npm run lint`, `npm run build` y `npm test` (no interactivo). Una tarea NO se considera terminada si alguno falla. Nunca deshabilites reglas ni uses `eslint-disable` para forzar un pase; si una regla es genuinamente incorrecta para el proyecto, cámbiala en `eslint.config.js` con justificación en el commit/PR. CI también bloquea el despliegue si `npm run lint` falla (ver `.github/workflows/deploy.yml`).
+
 - `src/test-setup.ts` registra `fake-indexeddb/auto` (vía `angular.json` → `test.setupFiles`). En tests con Dexie, parte de una DB limpia y cierra la conexión en `afterEach`; no uses esperas arbitrarias.
 
 ## Convenciones
@@ -69,12 +70,6 @@ Después de CUALQUIER tarea de implementación el agente DEBE ejecutar y pasar, 
 - Tests: `npm run test`
 
 ## AI tooling
-
-Skills disponibles en `.agents/skills/`:
-- `angular-developer`: generar código Angular, arquitectura, signals, forms, routing, testing, CLI.
-- `angular-new-app`: crear nuevas apps Angular con CLI.
-  Nota: su ejemplo `--ai-config=agents` no es aceptado por CLI 22.2.6; valores válidos son `vscode`, `claude`, `cursor`, `gemini`, `jetbrains`, `windsurf` o `none`.
-- `tailwind-4-docs`: Tailwind v4 (utilidades, variantes, config, migración). El snapshot de docs NO está incluido; requiere aceptar la licencia upstream ejecutando `python .agents/skills/tailwind-4-docs/scripts/sync_tailwind_docs.py --accept-docs-license`.
 
 MCP: servidor `angular-cli` configurado en `opencode.json` (`npx -y @angular/cli mcp`), con herramientas como `get_best_practices`, `search_documentation`, `run_target`, `devserver_*`. No hay MCP oficial de Tailwind.
 
