@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-hidden="true">
+  <!-- Baldosa papel #FAF7F0 con contorno tinta grueso para silueta en fondos oscuros -->
+  <rect x="12" y="12" width="488" height="488" rx="96" fill="#FAF7F0" stroke="#1C1917" stroke-width="24"/>
+  <!-- Raíl vertical tiempo (izquierda) + tres bloques escalonados a la derecha; bloque central terracota = "ahora" -->
+  <rect x="116" y="136" width="48" height="252" rx="12" fill="#1C1917"/>
+  <rect x="188" y="148" width="180" height="56" rx="12" fill="#1C1917"/>
+  <rect x="188" y="228" width="216" height="56" rx="12" fill="#C2410C"/>
+  <rect x="188" y="308" width="192" height="56" rx="12" fill="#1C1917"/>
+</svg>

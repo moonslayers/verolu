@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-hidden="true">
+  <!-- Favicon 16px legible: 3 bloques gruesos sin raíl, gaps amplios (36 px), terracota 104 px alto (~3.25 px a 16 px) y baldosa #FAF7F0 con contorno #1C1917 -->
+  <rect x="12" y="12" width="488" height="488" rx="96" fill="#FAF7F0" stroke="#1C1917" stroke-width="32"/>
+  <rect x="112" y="84" width="288" height="84" rx="18" fill="#1C1917"/>
+  <rect x="80" y="204" width="352" height="104" rx="18" fill="#C2410C"/>
+  <rect x="96" y="344" width="320" height="84" rx="18" fill="#1C1917"/>
+</svg>

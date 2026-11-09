@@ -2,7 +2,7 @@
 
 Aplicación web de **horario semanal** de la Prof. Verónica Luna Hernández. La consultan la profesora y sus estudiantes desde el navegador o instalada como PWA en el teléfono.
 
-Estado actual: estructura base y PWA listas; el port del prototipo (`prototype/`) al código Angular está en progreso. La UI muestra "En construcción — port en progreso".
+Estado actual: **port completado**. Las tres rutas (`#/hoy`, `#/horario`, `#/ajustes`) están implementadas con datos tipados y exportes, tema persistido y PWA lista.
 
 ## Stack
 
@@ -60,14 +60,34 @@ CI ejecuta `npm run lint` antes del build y bloquea el despliegue si falla (ver 
 npm run test
 ```
 
+## Rutas (hash)
+
+La app usa `withHashLocation()` para GitHub Pages. Rutas lazy: `/#/hoy` (estado del día + progreso), `/#/horario` (tabla semanal + búsqueda + impresión/exportes), `/#/ajustes` (tema). `''` y `**` redirigen a `hoy`. Navegación: 2 destinos primarios **Hoy** y **Horario** + **Ajustes** por engranaje en cabecera (en `/ajustes` la acción es **Volver**); en móvil bottom bar de 2 placas sin tercer tab.
+
+## Tema
+
+Claro / Oscuro / Sistema. Persistencia en IndexedDB vía `Dexie` (`ThemeRepository`) y `ThemeService` con `signal` + `computed` + `matchMedia('(prefers-color-scheme: dark)')` (único listener, `init()` idempotente). Se aplica `class="dark"` en `<html>`, `color-scheme` y `meta[name="theme-color"]` consolidada. `isDevMode()` controla `provideServiceWorker` y `provideAppInitializer` precarga el tema con `Promise.race 400 ms`.
+
+## Exportación e impresión
+
+Horario: **Imprimir** (`window.print()` + `@media print` A4 horizontal, `data-print="hide"`), **PDF** (`pdfmake` lazy) y **Excel** (`write-excel-file` lazy) con mapeo `buildPdfDefinition` / `buildExcelSheetData`. Botones deshabilitados durante la generación (`isExporting` + `aria-busy`, foco restaurado tras éxito/error).
+
+## Iconos
+
+Isotipo propio en `public/icons/`: `brand-icon.svg` (baldosa + raíl + 3 bloques), `brand-icon-favicon.svg` (3 bloques escalonados con anchos 288/352/320 — diferencia ≥32 px en 512 para 16 px legible), `brand-icon-maskable.svg`. PNG generados por script:
+
+```bash
+npm run icons:generate  # sharp + png-to-ico → icon-72…512, maskable, apple-touch-icon, favicon-16/32, favicon.ico
+```
+
+`manifest.webmanifest` usa `start_url` y `scope` relativos (`./`) a propósito para funcionar bajo el subpath `/verolu/`.
+
 ## Instalar la PWA en el teléfono
 
 La app se instala como PWA desde un origen servido por **HTTPS** (GitHub Pages cumple). El service worker solo se registra en producción (`enabled: !isDevMode()`).
 
 - Android (Chrome): abrir https://moonslayers.github.io/verolu/, menú ⋮ → "Instalar aplicación" / "Añadir a pantalla de inicio".
 - iOS (Safari): abrir la URL, botón Compartir → "Añadir a pantalla de inicio".
-
-El `manifest.webmanifest` usa `start_url` y `scope` relativos (`./`) a propósito para funcionar bajo el subpath `/verolu/`.
 
 ## Despliegue
 
@@ -80,6 +100,7 @@ Publicación en GitHub Pages bajo https://moonslayers.github.io/verolu/. El buil
 - `prototype/` — referencia HTML del prototipo (no modificar).
 - `.agents/skills/` — skills de IA (angular-developer, angular-new-app, tailwind-4-docs).
 - `.vscode/` — configuración del editor y MCP de VS Code.
+- `DESIGN.md` — decisiones de diseño, tokens, accesibilidad y limitaciones.
 
 ## AI tooling
 
@@ -92,7 +113,6 @@ MCP: servidor `angular-cli` configurado en `opencode.json` (`npx -y @angular/cli
 
 ## Roadmap
 
-- Port del horario del prototipo (`prototype/`) a componentes Angular.
 - Datos del horario como constantes tipadas (sin backend ni `localStorage` por ahora).
 
 ## Caveat conocido

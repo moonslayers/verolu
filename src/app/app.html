@@ -1,11 +1,92 @@
-<header class="border-b border-border bg-surface">
-  <div class="mx-auto max-w-5xl px-4 py-6">
-    <h1 class="text-2xl font-bold text-foreground">{{ title() }}</h1>
-    <p class="text-sm text-foreground-muted">Horario de clases — Prof. Verónica Luna Hernández</p>
+<a
+  href="#contenido"
+  class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-pill focus:bg-surface focus:px-4 focus:py-3 focus:text-foreground focus:shadow-card focus:outline-none focus:ring-2 focus:ring-accent"
+  >Saltar al contenido</a
+>
+
+<header data-print="hide" class="sticky top-0 z-40 border-b border-divider bg-surface">
+  <div class="mx-auto flex max-w-[960px] items-center justify-between gap-4 px-4 py-3">
+    <div class="flex items-center gap-3">
+      <app-brand-mark [size]="32" />
+      <div class="leading-tight">
+        <p class="text-body font-semibold text-foreground">Verónica Luna</p>
+        <p class="text-caption text-foreground-muted">Informática</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <nav aria-label="Navegación principal" class="hidden items-stretch overflow-hidden rounded-[10px] border border-divider md:flex">
+        <a
+          routerLink="/hoy"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          class="inline-flex min-h-11 items-center justify-center px-4 py-2 font-display text-sm font-medium text-foreground transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset aria-[current=page]:bg-accent aria-[current=page]:font-semibold aria-[current=page]:text-surface"
+          >Hoy</a
+        >
+        <span aria-hidden="true" class="w-px self-stretch bg-divider"></span>
+        <a
+          routerLink="/horario"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          class="inline-flex min-h-11 items-center justify-center px-4 py-2 font-display text-sm font-medium text-foreground transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset aria-[current=page]:bg-accent aria-[current=page]:font-semibold aria-[current=page]:text-surface"
+          >Horario</a
+        >
+      </nav>
+
+      @if (isSettings()) {
+        <button
+          type="button"
+          (click)="goBack()"
+          aria-label="Volver"
+          class="inline-flex size-11 items-center justify-center gap-2 rounded-full border border-divider bg-surface text-foreground transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent md:size-auto md:min-h-11 md:px-4"
+        >
+          <app-icon name="arrow-left" [size]="20" />
+          <span class="hidden md:inline font-display text-sm font-medium">Volver</span>
+        </button>
+      } @else {
+        <a
+          routerLink="/ajustes"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          aria-label="Ajustes"
+          class="inline-flex size-11 items-center justify-center rounded-full border border-divider bg-surface text-foreground transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent aria-[current=page]:border-accent aria-[current=page]:bg-accent/10 aria-[current=page]:text-accent"
+        >
+          <app-icon name="settings" [size]="20" />
+        </a>
+      }
+    </div>
   </div>
 </header>
-<main class="mx-auto max-w-5xl px-4 py-12">
-  <section class="rounded-2xl border border-border bg-surface-muted p-8 text-center">
-    <p class="text-foreground-muted">En construcción — port en progreso</p>
-  </section>
+
+<main
+  id="contenido"
+  tabindex="-1"
+  class="mx-auto max-w-[960px] overflow-x-hidden px-4 md:px-6 py-8 pb-[calc(56px+env(safe-area-inset-bottom)+24px)] md:pb-8"
+>
+  <router-outlet />
 </main>
+
+<nav
+  data-print="hide"
+  aria-label="Navegación principal"
+  class="fixed inset-x-0 bottom-0 z-40 border-t border-divider bg-surface md:hidden"
+  style="padding-bottom: env(safe-area-inset-bottom)"
+>
+  <div class="flex items-stretch">
+    <a
+      routerLink="/hoy"
+      routerLinkActive="active"
+      ariaCurrentWhenActive="page"
+      class="flex flex-1 items-center justify-center min-h-[56px] px-2 py-3 font-display text-[15px] font-medium text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset aria-[current=page]:bg-accent aria-[current=page]:font-semibold aria-[current=page]:text-surface"
+      >Hoy</a
+    >
+    <span aria-hidden="true" class="w-px bg-divider"></span>
+    <a
+      routerLink="/horario"
+      routerLinkActive="active"
+      ariaCurrentWhenActive="page"
+      class="flex flex-1 items-center justify-center min-h-[56px] px-2 py-3 font-display text-[15px] font-medium text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset aria-[current=page]:bg-accent aria-[current=page]:font-semibold aria-[current=page]:text-surface"
+      >Horario</a
+    >
+  </div>
+</nav>
