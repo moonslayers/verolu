@@ -21,7 +21,7 @@ Estado actual: estructura base y PWA listas; el port del prototipo (`prototype/`
 - `src/app/` — componentes, configuración (`app.config.ts`), estilos.
 - `public/` y `public/icons/` — assets estáticos y iconos PWA.
 - `prototype/` — referencia HTML del prototipo (no modificar; se portará después).
-- `.agents/skills/` — skills de IA del proyecto (angular-developer, angular-new-app, tailwind-4-docs).
+- `.agents/skills/` — skills de IA del proyecto (angular-developer, tailwind-4-docs, horario-exportaciones, horario-motor-temporal, horario-tema-persistencia, horario-marca-iconos, horario-pwa-actualizaciones).
 - `.vscode/` — configuración del editor y MCP de VS Code.
 - `dist/verolu/browser/` — salida de build (generada).
 
@@ -42,6 +42,9 @@ Después de CUALQUIER tarea de implementación el agente DEBE ejecutar y pasar, 
 - No importar `CommonModule`; importar solo las directivas/pipes usadas.
 - Sin CDNs ni librerías de UI/iconos salvo aprobación.
 - Copy de UI en español; identificadores en inglés.
+- Genera componentes, servicios, directivas, pipes, guards e interceptors con Angular CLI (`ng generate ...`), no a mano; luego ajústalos.
+- Antes de dar guía o generar código Angular, verifica la versión del proyecto (`ng version`); las APIs varían entre versiones.
+- Tailwind v4: usa `@import 'tailwindcss'`; no uses las directivas `@tailwind base/components/utilities`.
 - Accesibilidad: pasar AXE y WCAG AA (foco, contraste, ARIA).
 - Mobile-first.
 - Toda la UI sigue `DESIGN.md`. No hardcodees fondos claros (`bg-white`) ni texto blanco sobre `accent`: usa tokens (`surface-raised`, `text-surface`) para mantener AA en ambos temas.
@@ -62,6 +65,7 @@ Después de CUALQUIER tarea de implementación el agente DEBE ejecutar y pasar, 
 ## Comandos
 
 - Instalar: `npm install`
+- Angular CLI: incluido como devDependency; úsalo vía `npx ng ...` o scripts npm, sin instalación global.
 - Servir: `npm start` (equiv. `ng serve`, http://localhost:4200)
 - Build: `npm run build`
 - Build para Pages: `npm run build -- --base-href /verolu/`
@@ -70,6 +74,8 @@ Después de CUALQUIER tarea de implementación el agente DEBE ejecutar y pasar, 
 - Tests: `npm run test`
 
 ## AI tooling
+
+Antes de escribir o modificar código Angular, llama a `get_best_practices` del MCP `angular-cli` para cargar los estándares versionados.
 
 MCP: servidor `angular-cli` configurado en `opencode.json` (`npx -y @angular/cli mcp`), con herramientas como `get_best_practices`, `search_documentation`, `run_target`, `devserver_*`. No hay MCP oficial de Tailwind.
 

@@ -98,7 +98,7 @@ Publicación en GitHub Pages bajo https://moonslayers.github.io/verolu/. El buil
 - `src/app/` — componentes, configuración (`app.config.ts`), estilos.
 - `public/` y `public/icons/` — assets estáticos e iconos PWA.
 - `prototype/` — referencia HTML del prototipo (no modificar).
-- `.agents/skills/` — skills de IA (angular-developer, angular-new-app, tailwind-4-docs).
+- `.agents/skills/` — skills de IA (angular-developer, tailwind-4-docs, horario-exportaciones, horario-motor-temporal, horario-tema-persistencia, horario-marca-iconos, horario-pwa-actualizaciones).
 - `.vscode/` — configuración del editor y MCP de VS Code.
 - `DESIGN.md` — decisiones de diseño, tokens, accesibilidad y limitaciones.
 
@@ -106,7 +106,6 @@ Publicación en GitHub Pages bajo https://moonslayers.github.io/verolu/. El buil
 
 Skills en `.agents/skills/`:
 - `angular-developer`: código Angular, arquitectura, signals, forms, routing, testing, CLI.
-- `angular-new-app`: crear nuevas apps Angular con CLI.
 - `tailwind-4-docs`: Tailwind v4. El snapshot de docs NO está incluido; requiere aceptar la licencia upstream ejecutando `python .agents/skills/tailwind-4-docs/scripts/sync_tailwind_docs.py --accept-docs-license`.
 
 MCP: servidor `angular-cli` configurado en `opencode.json` (`npx -y @angular/cli mcp`). Tras modificar `opencode.json` o skills, reinicia opencode para que cargue los cambios.

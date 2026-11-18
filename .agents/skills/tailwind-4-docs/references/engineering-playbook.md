@@ -310,3 +310,8 @@ When in doubt:
 - keep state behavior inside the shared abstraction if the abstraction exists
 - verify that rendered DOM matches your selectors
 - prefer deleting complexity over introducing a clever abstraction
+
+## Reading the docs snapshot
+
+- Treat `export const title` and `export const description` in MDX as metadata.
+- Read JSX callouts such as `<TipInfo>` or `<TipBad>` as guidance text.

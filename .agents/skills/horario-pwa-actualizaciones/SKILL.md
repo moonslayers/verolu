@@ -41,9 +41,9 @@ Hash routing ⇒ sin navegaciones reales el SW no re-chequea solo. `UpdateServic
 
 | Necesidad                                        | Referencia                               |
 | ------------------------------------------------ | ---------------------------------------- |
-| Probar una actualización real de punta a punta   | `references/prueba-actualizacion-e2e.md` |
-| Tocar el contrato de toasts, su a11y o el outlet | `references/toast-contrato.md`           |
+| Probar una actualización real de punta a punta   | [references/prueba-actualizacion-e2e.md](references/prueba-actualizacion-e2e.md) |
+| Tocar el contrato de toasts, su a11y o el outlet | [references/toast-contrato.md](references/toast-contrato.md)           |
 
 ## Verificación
 
-Comandos obligatorios: los de `AGENTS.md`. La prueba manual está en `references/prueba-actualizacion-e2e.md`.
+Comandos obligatorios: los de `AGENTS.md`. La prueba manual está en [references/prueba-actualizacion-e2e.md](references/prueba-actualizacion-e2e.md).

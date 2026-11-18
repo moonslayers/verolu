@@ -20,3 +20,13 @@
 - Tailwind scans source files as plain text, so dynamically concatenated class fragments are not detected.
 - Use `@source` for external or unusual source locations, and `@source inline()` only when safelisting is truly necessary.
 - CSS modules and component `<style>` blocks need `@reference` to access theme vars.
+
+## v3→v4 migration checklist
+
+Confirm in the docs before upgrading:
+
+- Browser support and compatibility expectations.
+- Tooling: `@tailwindcss/postcss`, `@tailwindcss/cli`, `@tailwindcss/vite`.
+- Import syntax: `@import "tailwindcss"` replaces `@tailwind` directives.
+- Utility renames/removals, prefix format, and important modifier placement.
+- Changes to variants, transforms, and arbitrary value syntax.
